@@ -6,7 +6,7 @@
 
 ## Author
 
-👤 **Dan Murphy**
+👤 **Dan Murphy; 862085212; dmurp006@ucr.edu**
 
 * Website: [LinkedIn](https://www.linkedin.com/in/devbydan/)
 * GitHub: [@devbydan](https://github.com/devbydan)
@@ -163,3 +163,16 @@ hadoop dfs -ls / # verify creation of directories by looking at current dirs wit
 hdfs dfs -put ~/Downloads/hotel-booking.csv /data
 hdfs dfs -put ~/Downloads/customer-reservations.csv /data 
 ```
+
+## Problem Breakdown
+An overall description of how you chose to separate the problem into different
+MapReduce jobs, with reasoning.
+i. A description of each MapReduce job including:
+    1. What the job does
+    2. An estimate of runtime for the pass
+ii. A description of how you chose to do the join(s)
+iii. Code snippets
+
+## Team Contribution
+Each team member's detailed contribution.
+
