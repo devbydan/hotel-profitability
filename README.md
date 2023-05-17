@@ -157,7 +157,7 @@ jps # should see ResourceManager, NodeManager, NameNode, SecondaryNameNode, Data
 ```bash
 # Directories within Hadoop
 hdfs dfs -mkdir /data # create data directory to hold csv files
-hadoop dfs -ls / # verify creation of directories by looking at current dirs within the hadoop file system
+hdfs dfs -ls / # verify creation of directories by looking at current dirs within the hadoop file system
 
 # Populate the HDFS data directory with csv file(s)
 hdfs dfs -put ~/Downloads/hotel-booking.csv /data
