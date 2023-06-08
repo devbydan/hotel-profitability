@@ -6,7 +6,7 @@
 ############################################################################################################################
 
 # Navigate to src dir to run class
-cd  ../src/
+#cd  ../src/
 # --------------------------------
 
 # Enforce prerequisites
@@ -15,12 +15,3 @@ export JAVA_HOME=/usr/java/default
 export PATH=${JAVA_HOME}/bin:${PATH}
 export HADOOP_CLASSPATH=/usr/lib/jvm/java-8-openjdk-amd64/lib/tools.jar
 # ------------------------------------------------
-
-# Compile & create .jar file
-hadoop com.sun.tools.javac.Main MaxMonthlyProfits.java
-jar cf mmp.jar MaxMonthlyProfits*.class
-# ----------------------------------------------------
-
-# Runs MapReduce application instance with specified class name
-hadoop jar mmp.jar MaxMonthlyProfits /data /result
-# -------------------------------------------------
