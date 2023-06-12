@@ -193,6 +193,10 @@ $ sh prime-env.sh # ~/IdeaProjects/MaxProfit
 # Compiles java class, creates jar, runs MapReduce application
 $ sh run.sh # also ensures /result dir is removed for smooth operation
 ```
+```bash
+# Grabs the output from the /result dir
+$ sh get-result.sh # part-r-00000
+```
 [Optional]
 ```bash
 # Removes /result dir and deletes old jar prior to re-running
@@ -222,8 +226,6 @@ The MaxProfitMapper class implements the former half of a MapReduce job to proce
 There are variables that are held within this Map class to hold all important data calculated by helper methods. 
 
 The driving method of this class is map() which receives the two given .csv files for both hotel bookings and customer reservation data. In order to achieve the main goal of this project, the key is set to the Month-Year as this is what we want to associate the hotel's total revenue with (to find the most profitable month). All data is parsed through the comma delimiter, native to the .csv file structure.
-
-The helper methods within this class revolve around 
 
 ### MaxProfitReducer
 The MaxProfitReducer class implements the latter half of a MapReduce job to aggregate all individual revenue values associated with each Month-Year key respectively.
