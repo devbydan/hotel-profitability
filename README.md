@@ -198,7 +198,11 @@ $ sh run.sh # also ensures /result dir is removed for smooth operation
 # Removes /result dir and deletes old jar prior to re-running
 $ sh reset-hdfs-jar.sh # ensures updates are made and old jar is not used
 ```
-Once you are done, you can run the stop script to stop all services. If you shutdown or hibernate your computer while the services are running, the namenode may operate in safemode, which you will have to remove by using:
+Once you are done, you can run the stop script to stop all services.
+```bash
+$ sh stop.sh
+```
+If you shutdown or hibernate your computer while the services are running, the namenode may operate in safemode, which you will have to remove by using:
 ```bash
 $ hdfs dfsadmin -safemode -leave # forcibly leaves safemode
 ```
