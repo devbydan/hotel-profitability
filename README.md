@@ -14,7 +14,7 @@
 ## Technologies
 
 - Hadoop 3.3.4
-- Open JDK
+- Open JDK 8
 
 ## Requirements
 
@@ -106,16 +106,32 @@ nano hdfs-site.xml
 nano mapred-site.xml
 # Use the config below
 <configuration>
-    <property>
-       <name>mapreduce.framework.name</name>
-       <value>yarn</value>
-    </property>
-    <property>
-    <name>mapreduce.application.classpath</name>   
-  <value>
-$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*
-  </value>
-    </property>
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+  </property>
+
+<!-- Apache Hadoop Tutorial -->
+
+  <property>
+      <name>mapreduce.application.classpath</name>
+      <value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/l>
+  </property>
+
+  <property>
+    <name>yarn.app.mapreduce.am.env</name>
+    <value>HADOOP_MAPRED_HOME=/home/dan/hadoop</value>
+  </property>
+
+  <property>
+    <name>mapreduce.map.env</name>
+    <value>HADOOP_MAPRED_HOME=/home/dan/hadoop</value>
+  </property>
+
+  <property>
+    <name>mapreduce.reduce.env</name>
+    <value>HADOOP_MAPRED_HOME=/home/dan/hadoop</value>
+  </property>
 </configuration>
 ```
 
@@ -143,36 +159,83 @@ JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_
 
 ```bash
 # Initialize the Hadoop namenode before proceeding
-hadoop namenode -format # may also require -force flag (e.g., hadoop namenode -format -force)
+$ hadoop namenode -format # may also require -force flag (e.g., hadoop namenode -format -force)
 
 # Start HDFS services
-start-all.sh
+$ start-all.sh
 
 # Verify all services running
-jps # should see ResourceManager, NodeManager, NameNode, SecondaryNameNode, DataNode, etc
+$ jps # should see ResourceManager, NodeManager, NameNode, SecondaryNameNode, DataNode, etc
 ```
 
 ### Upload CSV's
 
 ```bash
 # Directories within Hadoop
-hdfs dfs -mkdir /data # create data directory to hold csv files
-hdfs dfs -ls / # verify creation of directories by looking at current dirs within the hadoop file system
+$ hdfs dfs -mkdir /data # create data directory to hold csv files
+$ hdfs dfs -ls / # verify creation of directories by looking at current dirs within the hadoop file system
 
 # Populate the HDFS data directory with csv file(s)
-hdfs dfs -put ~/Downloads/hotel-booking.csv /data
-hdfs dfs -put ~/Downloads/customer-reservations.csv /data 
+$ hdfs dfs -put ~/Downloads/hotel-booking.csv /data
+$ hdfs dfs -put ~/Downloads/customer-reservations.csv /data 
 ```
 
-## Problem Breakdown
-An overall description of how you chose to separate the problem into different
-MapReduce jobs, with reasoning.
-i. A description of each MapReduce job including:
-    1. What the job does
-    2. An estimate of runtime for the pass
-ii. A description of how you chose to do the join(s)
-iii. Code snippets
+### Initialize Project Workspace
+```bash
+# Starts HDFS services
+$ sh start.sh
+```
+```bash
+# Sets path variables for project dir
+$ sh prime-env.sh # ~/IdeaProjects/MaxProfit
+```
+```bash
+# Compiles java class, creates jar, runs MapReduce application
+$ sh run.sh # also ensures /result dir is removed for smooth operation
+```
+[Optional]
+```bash
+# Removes /result dir and deletes old jar prior to re-running
+$ sh reset-hdfs-jar.sh # ensures updates are made and old jar is not used
+```
+Once you are done, you can run the stop script to stop all services. If you shutdown or hibernate your computer while the services are running, the namenode may operate in safemode, which you will have to remove by using:
+```bash
+$ hdfs dfsadmin -safemode -leave # forcibly leaves safemode
+```
+
+## Code Breakdown
+
+### MaxProfitClass
+The MaxProfit parent class configures and runs a MapReduce job to calculate the hotel's revenue based on the two given .csv files:
+- hotel-booking.csv
+- customer-reservations.csv
+This class yields the total revenue for all Month-Year groups. A Python script later sorts these post MapReduce processing.
+
+### MaxProfitMapper
+The MaxProfitMapper class implements the former half of a MapReduce job to process each input record and emit the key-value pair which is represented by:
+- (KEY) Month-Year
+- (VALUE) Total Cost
+There are variables that are held within this Map class to hold all important data calculated by helper methods. 
+
+The driving method of this class is map() which receives the two given .csv files for both hotel bookings and customer reservation data. In order to achieve the main goal of this project, the key is set to the Month-Year as this is what we want to associate the hotel's total revenue with (to find the most profitable month). All data is parsed through the comma delimiter, native to the .csv file structure.
+
+The helper methods within this class revolve around 
+
+### MaxProfitReducer
+The MaxProfitReducer class implements the latter half of a MapReduce job to aggregate all individual revenue values associated with each Month-Year key respectively.
+
+### Main
+The main test harness initializes the mapper, combiner and reducer classes for the MapReduce jobs. The mapper maps the key-value pairs; the combiner locally reduces congestion by preprocessing the result data prior to feeding it into the reducer class; the reducer class reduces the set of intermediate key-value pairs overall.
+
+## Obstacles & Contingencies
+### HDFS Installation
+As this was my first time *actually* using Hadoop standalone, I encountered a wide variety of strange issues. Prior to this, I have used Apache Spark where I knew very little about its use and legitimate configuration, so I assumed that it was necessary create a foundation of Hadoop before using Spark. Due to this, there was minimal configuration needed for Hadoop specifically and all of the other configurations were highly dependent on Spark and utilizing Maven. It is crucial to provide the correct, absolute paths to the correct locations when initializing the MapReduce environment. If not, some services will not be able to run correctly or even at all! For example, some services may not have permissions, priority or even know what they are supposed to start service-wise when called upon if not configured correctly.
+
+### MapReduce vs Spark
+Regarding the coding differences between MapReduce and Spark is that my previous experience relies heavily on DataFrames or raw SQL queries whereas this project tackled Java code much different syntactically. Because of this, I originally tested my code by minimizing what I had to use code-wise in Java to ensure my map and reduce ideas were fully functional. To do this, I cleaned and merged both of the CSV files into one file and only reduced the data down to two columns: Month-Year and Cost. Once my map and reduce implementations worked, I began to increase the functionality within MapReduce and minimize what had to be done through a Python script. As of now, the MapReduce application performs as intended and yields the appropriate key-value pairs (Month-Year and Cost). Post MapReduce, a Python script runs and sorts the costs in ascending order, providing the result for the most profitable month.
+
+
 
 ## Team Contribution
-Each team member's detailed contribution.
+Daniel Murphy has designed, debugged, documented and implemented all functionality for this project.
 
