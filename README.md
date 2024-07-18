@@ -6,7 +6,7 @@
 
 ## Author
 
-👤 **Dan Murphy; 862085212; dmurp006@ucr.edu**
+👤 **Dan Murphy
 
 * Website: [LinkedIn](https://www.linkedin.com/in/devbydan/)
 * GitHub: [@devbydan](https://github.com/devbydan)
